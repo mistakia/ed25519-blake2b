@@ -1,0 +1,32 @@
+{
+  "name": "ed25519-blake2b",
+  "version": "0.0.1",
+  "main": "index.js",
+  "gypfile": true,
+  "license": "MIT",
+  "scripts": {
+    "rebuild": "node-gyp rebuild",
+    "test": "NODE_ENV=test TEST=all mocha --exit",
+    "prebuild": "prebuildify --napi --strip",
+    "prebuild-ia32": "prebuildify --napi --strip --arch=ia32",
+    "install": "node-gyp-build",
+    "prettier": "prettier --write .",
+    "lint": "eslint . --ext js,mjs"
+  },
+  "dependencies": {
+    "napi-macros": "^2.0.0",
+    "node-gyp-build": "^4.4.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.2",
+    "@babel/eslint-parser": "^7.18.2",
+    "chai": "^4.3.6",
+    "eslint": "^8.12.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "mocha": "^10.0.0",
+    "prettier": "^2.6.2"
+  }
+}
