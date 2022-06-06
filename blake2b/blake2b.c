@@ -39,7 +39,11 @@
 #include <x86intrin.h>
 #endif
 
+#if defined(HAVE_AVX2)
+#include "blake2b-compress-avx2.h"
+#else
 #include "blake2b-round.h"
+#endif
 
 static const uint64_t blake2b_IV[8] =
 {
@@ -148,6 +152,18 @@ int blake2b_init_key( blake2b_state *S, size_t outlen, const void *key, size_t k
   return 0;
 }
 
+#if defined(HAVE_AVX2)
+
+static void blake2b_compress( blake2b_state *S, const uint8_t block[BLAKE2B_BLOCKBYTES] )
+{
+  __m256i a = LOADU(&S->h[0]);
+  __m256i b = LOADU(&S->h[4]);
+  BLAKE2B_COMPRESS_V1(a, b, block, S->t[0], S->t[1], S->f[0], S->f[1]);
+  STOREU(&S->h[0], a);
+  STOREU(&S->h[4], b);
+}
+#else
+
 static void blake2b_compress( blake2b_state *S, const uint8_t block[BLAKE2B_BLOCKBYTES] )
 {
   __m128i row1l, row1h;
@@ -216,6 +232,7 @@ static void blake2b_compress( blake2b_state *S, const uint8_t block[BLAKE2B_BLOC
   STOREU( &S->h[4], _mm_xor_si128( LOADU( &S->h[4] ), row2l ) );
   STOREU( &S->h[6], _mm_xor_si128( LOADU( &S->h[6] ), row2h ) );
 }
+#endif
 
 
 int blake2b_update( blake2b_state *S, const void *pin, size_t inlen )
@@ -301,73 +318,5 @@ int blake2( void *out, size_t outlen, const void *in, size_t inlen, const void *
 int crypto_hash( unsigned char *out, unsigned char *in, unsigned long long inlen )
 {
   return blake2b( out, BLAKE2B_OUTBYTES, in, inlen, NULL, 0 );
-}
-#endif
-
-#if defined(BLAKE2B_SELFTEST)
-#include <string.h>
-#include "blake2-kat.h"
-int main( void )
-{
-  uint8_t key[BLAKE2B_KEYBYTES];
-  uint8_t buf[BLAKE2_KAT_LENGTH];
-  size_t i, step;
-
-  for( i = 0; i < BLAKE2B_KEYBYTES; ++i )
-    key[i] = ( uint8_t )i;
-
-  for( i = 0; i < BLAKE2_KAT_LENGTH; ++i )
-    buf[i] = ( uint8_t )i;
-
-  /* Test simple API */
-  for( i = 0; i < BLAKE2_KAT_LENGTH; ++i )
-  {
-    uint8_t hash[BLAKE2B_OUTBYTES];
-    blake2b( hash, BLAKE2B_OUTBYTES, buf, i, key, BLAKE2B_KEYBYTES );
-
-    if( 0 != memcmp( hash, blake2b_keyed_kat[i], BLAKE2B_OUTBYTES ) )
-    {
-      goto fail;
-    }
-  }
-
-  /* Test streaming API */
-  for(step = 1; step < BLAKE2B_BLOCKBYTES; ++step) {
-    for (i = 0; i < BLAKE2_KAT_LENGTH; ++i) {
-      uint8_t hash[BLAKE2B_OUTBYTES];
-      blake2b_state S;
-      uint8_t * p = buf;
-      size_t mlen = i;
-      int err = 0;
-
-      if( (err = blake2b_init_key(&S, BLAKE2B_OUTBYTES, key, BLAKE2B_KEYBYTES)) < 0 ) {
-        goto fail;
-      }
-
-      while (mlen >= step) {
-        if ( (err = blake2b_update(&S, p, step)) < 0 ) {
-          goto fail;
-        }
-        mlen -= step;
-        p += step;
-      }
-      if ( (err = blake2b_update(&S, p, mlen)) < 0) {
-        goto fail;
-      }
-      if ( (err = blake2b_final(&S, hash, BLAKE2B_OUTBYTES)) < 0) {
-        goto fail;
-      }
-
-      if (0 != memcmp(hash, blake2b_keyed_kat[i], BLAKE2B_OUTBYTES)) {
-        goto fail;
-      }
-    }
-  }
-
-  puts( "ok" );
-  return 0;
-fail:
-  puts("error");
-  return -1;
 }
 #endif
