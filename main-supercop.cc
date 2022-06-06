@@ -1,22 +1,13 @@
 #include <node_api.h>
 #include <napi-macros.h>
 
-#include "ed25519-donna/ed25519.h"
-
-NAPI_METHOD(node_publickey) {
-  NAPI_ARGV(2)
-  NAPI_ARGV_BUFFER_CAST(unsigned char *, secret_key, 0)
-  NAPI_ARGV_BUFFER_CAST(unsigned char *, public_key, 1)
-
-  ed25519_publickey(secret_key, public_key);
-  return NULL;
-}
+#include "ed25519-supercop/ed25519.h"
 
 NAPI_METHOD(node_sign) {
   NAPI_ARGV(4)
   NAPI_ARGV_BUFFER_CAST(unsigned char *, message, 0)
-  NAPI_ARGV_BUFFER_CAST(unsigned char *, secret_key, 1)
-  NAPI_ARGV_BUFFER_CAST(unsigned char *, public_key, 2)
+  NAPI_ARGV_BUFFER_CAST(unsigned char *, public_key, 1)
+  NAPI_ARGV_BUFFER_CAST(unsigned char *, secret_key, 2)
   NAPI_ARGV_BUFFER_CAST(unsigned char *, signature, 3)
 
   if (public_key_len != 32) {
@@ -29,7 +20,7 @@ NAPI_METHOD(node_sign) {
     return NULL;
   }
 
-  ed25519_sign(message, message_len, secret_key, public_key, signature);
+  ed25519_sign(signature, message, message_len, public_key, secret_key);
   return NULL;
 }
 
@@ -49,12 +40,37 @@ NAPI_METHOD(node_verify) {
     return NULL;
   }
 
-  int res = ed25519_sign_open(message, message_len, public_key, signature);
+  bool result = ed25519_verify(signature, message, message_len, public_key);
+  int res = result ? 1 : 0;
   NAPI_RETURN_UINT32(res)
+}
+
+NAPI_METHOD(node_create_seed) {
+  NAPI_ARGV(1)
+  NAPI_ARGV_BUFFER_CAST(unsigned char *, seed, 0)
+
+  ed25519_create_seed(seed);
+  return NULL;
+}
+
+NAPI_METHOD(node_create_keypair) {
+  NAPI_ARGV(3)
+  NAPI_ARGV_BUFFER_CAST(unsigned char *, seed, 0)
+  NAPI_ARGV_BUFFER_CAST(unsigned char *, public_key, 1)
+  NAPI_ARGV_BUFFER_CAST(unsigned char *, secret_key, 2)
+
+  if (seed_len != 32) {
+    napi_throw_error(env, "EINVAL", "seed must be 32 bytes");
+    return NULL;
+  }
+
+  ed25519_create_keypair(public_key, secret_key, seed);
+  return NULL;
 }
 
 NAPI_INIT() {
   NAPI_EXPORT_FUNCTION(node_sign)
   NAPI_EXPORT_FUNCTION(node_verify)
-  NAPI_EXPORT_FUNCTION(node_publickey)
+  NAPI_EXPORT_FUNCTION(node_create_seed)
+  NAPI_EXPORT_FUNCTION(node_create_keypair)
 }

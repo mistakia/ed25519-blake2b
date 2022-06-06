@@ -10,20 +10,20 @@ void ed25519_sign(unsigned char *signature, const unsigned char *message, size_t
   ge_p3 R;
 
 
-  blake2b_init(&hash, 32);
+  blake2b_init(&hash, 64);
   blake2b_update(&hash, private_key + 32, 32);
   blake2b_update(&hash, message, message_len);
-  blake2b_final(&hash, r, 32);
+  blake2b_final(&hash, r, 64);
 
   sc_reduce(r);
   ge_scalarmult_base(&R, r);
   ge_p3_tobytes(signature, &R);
 
-  blake2b_init(&hash, 32);
+  blake2b_init(&hash, 64);
   blake2b_update(&hash, signature, 32);
   blake2b_update(&hash, public_key, 32);
   blake2b_update(&hash, message, message_len);
-  blake2b_final(&hash, hram, 32);
+  blake2b_final(&hash, hram, 64);
 
   sc_reduce(hram);
   sc_muladd(signature + 32, hram, private_key, r);

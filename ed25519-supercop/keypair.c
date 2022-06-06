@@ -6,7 +6,7 @@ void ed25519_create_keypair(unsigned char *public_key, unsigned char *private_ke
     ge_p3 A;
     blake2b_state hash;
 
-    blake2b_init(&hash, 32);
+    blake2b_init(&hash, 64);
     blake2b_update(&hash, seed, 32);
     blake2b_final(&hash, private_key, 64);
 
