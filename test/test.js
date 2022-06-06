@@ -42,6 +42,15 @@ describe('create seed', function () {
     expect(ed25519.hash('kitties')).to.equalBytes(hash)
   })
 
+  it('hash checksum', function () {
+    const hash = Buffer.from(
+      'EED86BF2609795DD06F34A6AF55D0A734A844E08D99351166DFDC7EEC8721CCC',
+      'hex'
+    )
+    const checksum = Buffer.from('87edbb8d3b', 'hex')
+    expect(ed25519.hash(hash, 5)).to.equalBytes(checksum)
+  })
+
   it('sign and verify', function () {
     const privateKey = crypto.randomBytes(32)
     const publicKey = ed25519.publicKey(privateKey)

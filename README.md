@@ -7,6 +7,7 @@ Node.js bindings for C++/C implementations of ed25519 using BLAKE2b instead of S
 ```
 yarn add @trashman/ed25519-blake2b
 ```
+
 ```
 npm install @trashman/ed25519-blake2b
 ```

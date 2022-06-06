@@ -59,7 +59,7 @@ NAPI_METHOD(node_hash) {
   NAPI_ARGV_BUFFER_CAST(unsigned char *, message, 0)
   NAPI_ARGV_BUFFER_CAST(unsigned char *, output, 1)
 
-  blake2b(output, 32, message, message_len, NULL, 0);
+  blake2b(output, output_len, message, message_len, NULL, 0);
   return NULL;
 }
 
