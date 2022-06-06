@@ -2,6 +2,7 @@
 #include <napi-macros.h>
 
 #include "ed25519-donna/ed25519.h"
+#include "blake2/blake2.h"
 
 NAPI_METHOD(node_publickey) {
   NAPI_ARGV(2)
@@ -53,8 +54,18 @@ NAPI_METHOD(node_verify) {
   NAPI_RETURN_UINT32(res)
 }
 
+NAPI_METHOD(node_hash) {
+  NAPI_ARGV(2)
+  NAPI_ARGV_BUFFER_CAST(unsigned char *, message, 0)
+  NAPI_ARGV_BUFFER_CAST(unsigned char *, output, 1)
+
+  blake2b(output, 32, message, message_len, NULL, 0);
+  return NULL;
+}
+
 NAPI_INIT() {
   NAPI_EXPORT_FUNCTION(node_sign)
   NAPI_EXPORT_FUNCTION(node_verify)
   NAPI_EXPORT_FUNCTION(node_publickey)
+  NAPI_EXPORT_FUNCTION(node_hash)
 }

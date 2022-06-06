@@ -50,3 +50,14 @@ exports.verify = function (signature, message, publicKey) {
 
   return bindings.node_verify(signature, message, publicKey) === 0
 }
+
+exports.hash = function (message) {
+  if (typeof message === 'string') message = Buffer.from(message)
+  else if (!Buffer.isBuffer(message)) {
+    throw new Error('message must be a buffer or a string')
+  }
+
+  const output = Buffer.alloc(32)
+  bindings.node_hash(message, output)
+  return output
+}

@@ -9,7 +9,7 @@
 	void ed25519_hash(uint8_t *hash, const uint8_t *in, size_t inlen);
 */
 
-#include "../blake2b/blake2.h"
+#include "../blake2/blake2.h"
 
 typedef blake2b_state ed25519_hash_context;
 

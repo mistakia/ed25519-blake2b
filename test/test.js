@@ -9,13 +9,13 @@ chai.use(chaiBytes)
 const expect = chai.expect
 
 describe('create seed', function () {
-  it('public key', function () {
+  it('public key 0x01', function () {
     const privateKey = Buffer.from('0100000000000000000000000000000000000000000000000000000000000000', 'hex')
     const publicKey = Buffer.from('C6EB8DB0B120DC5BE0074E2ED7E3003153DB9844BC8F0B5D732EF76E6BE604F4', 'hex')
     expect(ed25519.publicKey(privateKey)).to.equalBytes(publicKey)
   })
 
-  it('public key', function () {
+  it('public key 0x00', function () {
     const privateKey = Buffer.from('0000000000000000000000000000000000000000000000000000000000000000', 'hex')
     const publicKey = Buffer.from('19D3D919475DEED4696B5D13018151D1AF88B2BD3BCFF048B45031C1F36D1858', 'hex')
     expect(ed25519.publicKey(privateKey)).to.equalBytes(publicKey)
@@ -56,19 +56,22 @@ describe('create seed', function () {
 
   it('vote signature', function () {
     const signature = Buffer.from(
-      '77567A9A6F22E18778754B679FCC9515B3EEC84C6FA9F8DB5556F1B22A71C0199456E8823DCA41B009E6CF9708EDC1F52F809DE63A75DFECC4CE2FE694F2CF01',
+      'D27F3042065EB56E66A4D2CD0A30DBA516338A3189DC352E90524355A2D1A01326765D40B6E72E54654C531B375DF5986873E83C794DC01AFC83124237F1A902',
       'hex'
     )
     const publicKey = Buffer.from(
-      '2298FAB7C61058E77EA554CB93EDEEDA0692CBFCC540AB213B2836B29029E23A',
+      '98A00F4E3FFA39BFFA4A4C0BCD6608CE6421ABC9312738028E928D7440347C34',
       'hex'
     )
-    const msg = Buffer.from(
-      '766f746520d77e1a52842b77269be4fce0b9cbd282d6e4b0f9dce7940ee1e437d1a2822f17ffffffffffffffff',
+    const prefix = Buffer.from('vote ', 'ascii')
+    const hash = Buffer.from(
+      '991CF190094C00F0B68E2E5F75F6BEE95A2E0BD93CEAA4A6734DB9F19B728948',
       'hex'
     )
+    const seq = Buffer.from('ffffffffffffffff', 'hex')
+    const msg = Buffer.concat([prefix, hash, seq])
 
-    const isValid = ed25519.verify(signature, msg, publicKey)
+    const isValid = ed25519.verify(signature, ed25519.hash(msg), publicKey)
     expect(isValid).to.equal(true)
   })
 
@@ -107,7 +110,7 @@ describe('create seed', function () {
     const seq = Buffer.from('ffffffffffffffff', 'hex')
     const msg = Buffer.concat([prefix, hash, seq])
 
-    const isValid = ed25519.verify(signature, msg, publicKey)
+    const isValid = ed25519.verify(signature, ed25519.hash(msg), publicKey)
     expect(isValid).to.equal(false)
   })
 })
