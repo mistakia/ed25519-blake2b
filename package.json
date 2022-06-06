@@ -1,5 +1,5 @@
 {
-  "name": "ed25519-blake2b",
+  "name": "@trashman/ed25519-blake2b",
   "version": "0.0.1",
   "main": "index.js",
   "gypfile": true,
