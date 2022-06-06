@@ -9,6 +9,18 @@ chai.use(chaiBytes)
 const expect = chai.expect
 
 describe('create seed', function () {
+  it('public key', function () {
+    const privateKey = Buffer.from('0100000000000000000000000000000000000000000000000000000000000000', 'hex')
+    const publicKey = Buffer.from('C6EB8DB0B120DC5BE0074E2ED7E3003153DB9844BC8F0B5D732EF76E6BE604F4', 'hex')
+    expect(ed25519.publicKey(privateKey)).to.equalBytes(publicKey)
+  })
+
+  it('public key', function () {
+    const privateKey = Buffer.from('0000000000000000000000000000000000000000000000000000000000000000', 'hex')
+    const publicKey = Buffer.from('19D3D919475DEED4696B5D13018151D1AF88B2BD3BCFF048B45031C1F36D1858', 'hex')
+    expect(ed25519.publicKey(privateKey)).to.equalBytes(publicKey)
+  })
+
   it('sign and verify', function () {
     const privateKey =
       '68BB5E12200DD9E2565A66CC5C049AAD35801B5DDDED5CC8BF83C93CB7DEB268'

@@ -295,7 +295,7 @@ curve25519_expand(bignum25519 out, const unsigned char *in) {
 		x2 = *(uint64_t *)(in + 16);
 		x3 = *(uint64_t *)(in + 24);
 	} else {
-		#define F(s)                         \
+		#define F_curve25519_expand(s)                         \
 			((((uint64_t)in[s + 0])      ) | \
 			 (((uint64_t)in[s + 1]) <<  8) | \
 			 (((uint64_t)in[s + 2]) << 16) | \
@@ -305,10 +305,10 @@ curve25519_expand(bignum25519 out, const unsigned char *in) {
 			 (((uint64_t)in[s + 6]) << 48) | \
 			 (((uint64_t)in[s + 7]) << 56))
 
-		x0 = F(0);
-		x1 = F(8);
-		x2 = F(16);
-		x3 = F(24);
+		x0 = F_curve25519_expand(0);
+		x1 = F_curve25519_expand(8);
+		x2 = F_curve25519_expand(16);
+		x3 = F_curve25519_expand(24);
 	}
 
 	out[0] = x0 & reduce_mask_51; x0 = (x0 >> 51) | (x1 << 13);
