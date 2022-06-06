@@ -22,9 +22,9 @@ for (; count < 100000; count++) {
 
 const end = process.hrtime.bigint()
 
-const seconds = Number(
-  (end - start) / BigInt(1e9)
-)
+const seconds = Number((end - start) / BigInt(1e9))
 console.log(
-  `Verified ${count} signatures in ${seconds} secs (${Math.round(count / seconds)} ops/sec)`
+  `Verified ${count} signatures in ${seconds} secs (${Math.round(
+    count / seconds
+  )} ops/sec)`
 )
