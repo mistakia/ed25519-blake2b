@@ -1,9 +1,11 @@
 {
   "name": "@trashman/ed25519-blake2b",
   "version": "0.0.1",
+  "description": "Bindings to ed25519-donna implementation using blake2b",
   "main": "index.js",
   "gypfile": true,
   "license": "MIT",
+  "repository": "github:mistakia/ed25519-blake2b",
   "scripts": {
     "rebuild": "node-gyp rebuild",
     "test": "NODE_ENV=test TEST=all mocha --exit",

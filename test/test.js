@@ -1,5 +1,6 @@
 /* global describe it */
 
+const crypto = require('crypto')
 const chai = require('chai')
 const chaiBytes = require('chai-bytes')
 const ed25519 = require('../')
@@ -10,27 +11,41 @@ const expect = chai.expect
 
 describe('create seed', function () {
   it('public key 0x01', function () {
-    const privateKey = Buffer.from('0100000000000000000000000000000000000000000000000000000000000000', 'hex')
-    const publicKey = Buffer.from('C6EB8DB0B120DC5BE0074E2ED7E3003153DB9844BC8F0B5D732EF76E6BE604F4', 'hex')
+    const privateKey = Buffer.from(
+      '0100000000000000000000000000000000000000000000000000000000000000',
+      'hex'
+    )
+    const publicKey = Buffer.from(
+      'C6EB8DB0B120DC5BE0074E2ED7E3003153DB9844BC8F0B5D732EF76E6BE604F4',
+      'hex'
+    )
     expect(ed25519.publicKey(privateKey)).to.equalBytes(publicKey)
   })
 
   it('public key 0x00', function () {
-    const privateKey = Buffer.from('0000000000000000000000000000000000000000000000000000000000000000', 'hex')
-    const publicKey = Buffer.from('19D3D919475DEED4696B5D13018151D1AF88B2BD3BCFF048B45031C1F36D1858', 'hex')
-    expect(ed25519.publicKey(privateKey)).to.equalBytes(publicKey)
-  })
-
-  it('sign and verify', function () {
-    const privateKey =
-      '68BB5E12200DD9E2565A66CC5C049AAD35801B5DDDED5CC8BF83C93CB7DEB268'
+    const privateKey = Buffer.from(
+      '0000000000000000000000000000000000000000000000000000000000000000',
+      'hex'
+    )
     const publicKey = Buffer.from(
-      'E80B5A3FB99AAA6067AC1486038CD51BF6B595699F8CCD08D190E50482117895',
+      '19D3D919475DEED4696B5D13018151D1AF88B2BD3BCFF048B45031C1F36D1858',
       'hex'
     )
     expect(ed25519.publicKey(privateKey)).to.equalBytes(publicKey)
+  })
 
-    const msg = 'whatever'
+  it('hash', function () {
+    const hash = Buffer.from(
+      '28fa333689183c30bc5e2cfd24499ffd714f6b7813fa4433df11106ba8733ab9',
+      'hex'
+    )
+    expect(ed25519.hash('kitties')).to.equalBytes(hash)
+  })
+
+  it('sign and verify', function () {
+    const privateKey = crypto.randomBytes(32)
+    const publicKey = ed25519.publicKey(privateKey)
+    const msg = crypto.randomBytes(32)
     const signature = ed25519.sign(msg, privateKey, publicKey)
 
     const isValid = ed25519.verify(signature, msg, publicKey)
