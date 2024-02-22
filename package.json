@@ -16,8 +16,8 @@
     "lint": "eslint . --ext js,mjs"
   },
   "dependencies": {
-    "napi-macros": "^2.0.0",
-    "node-gyp-build": "^4.4.0"
+    "napi-macros": "2.0.0",
+    "node-gyp-build": "4.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.18.2",
