@@ -1,6 +1,6 @@
 {
   "name": "@trashman/ed25519-blake2b",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Bindings to ed25519-donna implementation using blake2b",
   "main": "index.js",
   "gypfile": true,
