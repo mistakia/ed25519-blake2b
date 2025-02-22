@@ -23,13 +23,13 @@
 #include "blake2.h"
 #include "blake2-impl.h"
 
-int blake2xs_init( blake2xs_state *S, const size_t outlen ) {
-  return blake2xs_init_key(S, outlen, NULL, 0);
+int blake2xb_init( blake2xb_state *S, const size_t outlen ) {
+  return blake2xb_init_key(S, outlen, NULL, 0);
 }
 
-int blake2xs_init_key( blake2xs_state *S, const size_t outlen, const void *key, size_t keylen )
+int blake2xb_init_key( blake2xb_state *S, const size_t outlen, const void *key, size_t keylen)
 {
-  if ( outlen == 0 || outlen > 0xFFFFUL ) {
+  if ( outlen == 0 || outlen > 0xFFFFFFFFUL ) {
     return -1;
   }
 
@@ -42,42 +42,43 @@ int blake2xs_init_key( blake2xs_state *S, const size_t outlen, const void *key, 
   }
 
   /* Initialize parameter block */
-  S->P->digest_length = BLAKE2S_OUTBYTES;
+  S->P->digest_length = BLAKE2B_OUTBYTES;
   S->P->key_length    = keylen;
   S->P->fanout        = 1;
   S->P->depth         = 1;
   store32( &S->P->leaf_length, 0 );
   store32( &S->P->node_offset, 0 );
-  store16( &S->P->xof_length, outlen );
+  store32( &S->P->xof_length, outlen );
   S->P->node_depth    = 0;
   S->P->inner_length  = 0;
+  memset( S->P->reserved, 0, sizeof( S->P->reserved ) );
   memset( S->P->salt,     0, sizeof( S->P->salt ) );
   memset( S->P->personal, 0, sizeof( S->P->personal ) );
 
-  if( blake2s_init_param( S->S, S->P ) < 0 ) {
+  if( blake2b_init_param( S->S, S->P ) < 0 ) {
     return -1;
   }
 
   if (keylen > 0) {
-    uint8_t block[BLAKE2S_BLOCKBYTES];
-    memset(block, 0, BLAKE2S_BLOCKBYTES);
+    uint8_t block[BLAKE2B_BLOCKBYTES];
+    memset(block, 0, BLAKE2B_BLOCKBYTES);
     memcpy(block, key, keylen);
-    blake2s_update(S->S, block, BLAKE2S_BLOCKBYTES);
-    secure_zero_memory(block, BLAKE2S_BLOCKBYTES);
+    blake2b_update(S->S, block, BLAKE2B_BLOCKBYTES);
+    secure_zero_memory(block, BLAKE2B_BLOCKBYTES);
   }
   return 0;
 }
 
-int blake2xs_update( blake2xs_state *S, const void *in, size_t inlen ) {
-  return blake2s_update( S->S, in, inlen );
+int blake2xb_update( blake2xb_state *S, const void *in, size_t inlen ) {
+    return blake2b_update( S->S, in, inlen );
 }
 
-int blake2xs_final(blake2xs_state *S, void *out, size_t outlen) {
+int blake2xb_final( blake2xb_state *S, void *out, size_t outlen) {
 
-  blake2s_state C[1];
-  blake2s_param P[1];
-  uint16_t xof_length = load16(&S->P->xof_length);
-  uint8_t root[BLAKE2S_BLOCKBYTES];
+  blake2b_state C[1];
+  blake2b_param P[1];
+  uint32_t xof_length = load32(&S->P->xof_length);
+  uint8_t root[BLAKE2B_BLOCKBYTES];
   size_t i;
 
   if (NULL == out) {
@@ -86,7 +87,7 @@ int blake2xs_final(blake2xs_state *S, void *out, size_t outlen) {
 
   /* outlen must match the output size defined in xof_length, */
   /* unless it was -1, in which case anything goes except 0. */
-  if(xof_length == 0xFFFFUL) {
+  if(xof_length == 0xFFFFFFFFUL) {
     if(outlen == 0) {
       return -1;
     }
@@ -97,29 +98,29 @@ int blake2xs_final(blake2xs_state *S, void *out, size_t outlen) {
   }
 
   /* Finalize the root hash */
-  if (blake2s_final(S->S, root, BLAKE2S_OUTBYTES) < 0) {
+  if (blake2b_final(S->S, root, BLAKE2B_OUTBYTES) < 0) {
     return -1;
   }
 
   /* Set common block structure values */
   /* Copy values from parent instance, and only change the ones below */
-  memcpy(P, S->P, sizeof(blake2s_param));
+  memcpy(P, S->P, sizeof(blake2b_param));
   P->key_length = 0;
   P->fanout = 0;
   P->depth = 0;
-  store32(&P->leaf_length, BLAKE2S_OUTBYTES);
-  P->inner_length = BLAKE2S_OUTBYTES;
+  store32(&P->leaf_length, BLAKE2B_OUTBYTES);
+  P->inner_length = BLAKE2B_OUTBYTES;
   P->node_depth = 0;
 
   for (i = 0; outlen > 0; ++i) {
-    const size_t block_size = (outlen < BLAKE2S_OUTBYTES) ? outlen : BLAKE2S_OUTBYTES;
+    const size_t block_size = (outlen < BLAKE2B_OUTBYTES) ? outlen : BLAKE2B_OUTBYTES;
     /* Initialize state */
     P->digest_length = block_size;
     store32(&P->node_offset, i);
-    blake2s_init_param(C, P);
+    blake2b_init_param(C, P);
     /* Process key if needed */
-    blake2s_update(C, root, BLAKE2S_OUTBYTES);
-    if (blake2s_final(C, (uint8_t *)out + i * BLAKE2S_OUTBYTES, block_size) < 0) {
+    blake2b_update(C, root, BLAKE2B_OUTBYTES);
+    if (blake2b_final(C, (uint8_t *)out + i * BLAKE2B_OUTBYTES, block_size) < 0 ) {
         return -1;
     }
     outlen -= block_size;
@@ -127,13 +128,14 @@ int blake2xs_final(blake2xs_state *S, void *out, size_t outlen) {
   secure_zero_memory(root, sizeof(root));
   secure_zero_memory(P, sizeof(P));
   secure_zero_memory(C, sizeof(C));
-  /* Put blake2xs in an invalid state? cf. blake2s_is_lastblock */
+  /* Put blake2xb in an invalid state? cf. blake2s_is_lastblock */
   return 0;
+
 }
 
-int blake2xs(void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen)
+int blake2xb(void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen)
 {
-  blake2xs_state S[1];
+  blake2xb_state S[1];
 
   /* Verify parameters */
   if (NULL == in && inlen > 0)
@@ -145,34 +147,34 @@ int blake2xs(void *out, size_t outlen, const void *in, size_t inlen, const void 
   if (NULL == key && keylen > 0)
     return -1;
 
-  if (keylen > BLAKE2S_KEYBYTES)
+  if (keylen > BLAKE2B_KEYBYTES)
     return -1;
 
   if (outlen == 0)
     return -1;
 
   /* Initialize the root block structure */
-  if (blake2xs_init_key(S, outlen, key, keylen) < 0) {
+  if (blake2xb_init_key(S, outlen, key, keylen) < 0) {
     return -1;
   }
 
   /* Absorb the input message */
-  blake2xs_update(S, in, inlen);
+  blake2xb_update(S, in, inlen);
 
   /* Compute the root node of the tree and the final hash using the counter construction */
-  return blake2xs_final(S, out, outlen);
+  return blake2xb_final(S, out, outlen);
 }
 
-#if defined(BLAKE2XS_SELFTEST)
+#if defined(BLAKE2XB_SELFTEST)
 #include <string.h>
 #include "blake2-kat.h"
 int main( void )
 {
-  uint8_t key[BLAKE2S_KEYBYTES];
+  uint8_t key[BLAKE2B_KEYBYTES];
   uint8_t buf[BLAKE2_KAT_LENGTH];
   size_t i, step, outlen;
 
-  for( i = 0; i < BLAKE2S_KEYBYTES; ++i ) {
+  for( i = 0; i < BLAKE2B_KEYBYTES; ++i ) {
     key[i] = ( uint8_t )i;
   }
 
@@ -187,44 +189,44 @@ int main( void )
   for( outlen = 1; outlen <= BLAKE2_KAT_LENGTH; ++outlen )
   {
       uint8_t hash[BLAKE2_KAT_LENGTH] = {0};
-      if( blake2xs( hash, outlen, buf, BLAKE2_KAT_LENGTH, key, BLAKE2S_KEYBYTES ) < 0 ) {
+      if( blake2xb( hash, outlen, buf, BLAKE2_KAT_LENGTH, key, BLAKE2B_KEYBYTES ) < 0 ) {
         goto fail;
       }
 
-      if( 0 != memcmp( hash, blake2xs_keyed_kat[outlen-1], outlen ) )
+      if( 0 != memcmp( hash, blake2xb_keyed_kat[outlen-1], outlen ) )
       {
         goto fail;
       }
   }
 
   /* Test streaming API */
-  for(step = 1; step < BLAKE2S_BLOCKBYTES; ++step) {
+  for(step = 1; step < BLAKE2B_BLOCKBYTES; ++step) {
     for (outlen = 1; outlen <= BLAKE2_KAT_LENGTH; ++outlen) {
       uint8_t hash[BLAKE2_KAT_LENGTH];
-      blake2xs_state S;
+      blake2xb_state S;
       uint8_t * p = buf;
       size_t mlen = BLAKE2_KAT_LENGTH;
       int err = 0;
 
-      if( (err = blake2xs_init_key(&S, outlen, key, BLAKE2S_KEYBYTES)) < 0 ) {
+      if( (err = blake2xb_init_key(&S, outlen, key, BLAKE2B_KEYBYTES)) < 0 ) {
         goto fail;
       }
 
       while (mlen >= step) {
-        if ( (err = blake2xs_update(&S, p, step)) < 0 ) {
+        if ( (err = blake2xb_update(&S, p, step)) < 0 ) {
           goto fail;
         }
         mlen -= step;
         p += step;
       }
-      if ( (err = blake2xs_update(&S, p, mlen)) < 0) {
+      if ( (err = blake2xb_update(&S, p, mlen)) < 0) {
         goto fail;
       }
-      if ( (err = blake2xs_final(&S, hash, outlen)) < 0) {
+      if ( (err = blake2xb_final(&S, hash, outlen)) < 0) {
         goto fail;
       }
 
-      if (0 != memcmp(hash, blake2xs_keyed_kat[outlen-1], outlen)) {
+      if (0 != memcmp(hash, blake2xb_keyed_kat[outlen-1], outlen)) {
         goto fail;
       }
     }

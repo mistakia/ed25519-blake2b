@@ -18,17 +18,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#if defined(_MSC_VER)
-#define BLAKE2_PACKED(x) __pragma(pack(push, 1)) x __pragma(pack(pop))
-#define ALIGN(x) __declspec(align(x))
-#else
-#define BLAKE2_PACKED(x) x __attribute__((packed))
-#define ALIGN(x) __attribute__((aligned(x)))
-#endif
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+  #define BLAKE2_PACKED(x) x __attribute__((packed))
 
   enum blake2s_constant
   {
@@ -139,8 +133,8 @@ extern "C" {
 
   /* Padded structs result in a compile-time error */
   enum {
-    BLAKE2_DUMMY_1 = 1/(sizeof(blake2s_param) == BLAKE2S_OUTBYTES),
-    BLAKE2_DUMMY_2 = 1/(sizeof(blake2b_param) == BLAKE2B_OUTBYTES)
+    BLAKE2_DUMMY_1 = 1/(int)(sizeof(blake2s_param) == BLAKE2S_OUTBYTES),
+    BLAKE2_DUMMY_2 = 1/(int)(sizeof(blake2b_param) == BLAKE2B_OUTBYTES)
   };
 
   /* Streaming API */

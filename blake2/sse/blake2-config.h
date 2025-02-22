@@ -16,7 +16,7 @@
 #define BLAKE2_CONFIG_H
 
 /* These don't work everywhere */
-#if defined(__SSE2__) || defined(__x86_64__) || defined(__amd64__) || defined(_M_AMD64) || defined(_M_X64)
+#if defined(__SSE2__) || defined(__x86_64__) || defined(__amd64__)
 #define HAVE_SSE2
 #endif
 
@@ -30,10 +30,6 @@
 
 #if defined(__AVX__)
 #define HAVE_AVX
-#endif
-
-#if defined(__AVX2__)
-#define HAVE_AVX2
 #endif
 
 #if defined(__XOP__)

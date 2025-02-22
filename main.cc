@@ -2,7 +2,11 @@
 #include <napi-macros.h>
 
 #include "ed25519-donna/ed25519.h"
-#include "blake2/blake2.h"
+#ifdef BLAKE2_USE_SSE
+#include "blake2/sse/blake2.h"
+#else
+#include "blake2/ref/blake2.h"
+#endif
 
 NAPI_METHOD(node_publickey) {
   NAPI_ARGV(2)
