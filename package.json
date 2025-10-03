@@ -1,6 +1,6 @@
 {
   "name": "@trashman/ed25519-blake2b",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Bindings to ed25519-donna implementation using blake2b",
   "main": "index.js",
   "gypfile": true,
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "napi-macros": "2.0.0",
-    "node-gyp-build": "4.4.0"
+    "node-gyp-build": "4.8.4"
   },
   "devDependencies": {
     "@babel/core": "^7.18.2",
