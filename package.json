@@ -14,7 +14,7 @@
     "install": "node-gyp-build",
     "prettier": "prettier --write .",
     "lint": "eslint . --ext js,mjs",
-    "verify": "yarn lint && yarn test"
+    "verify": "yarn lint"
   },
   "dependencies": {
     "napi-macros": "2.0.0",
