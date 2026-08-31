@@ -13,7 +13,8 @@
     "prebuild-ia32": "prebuildify --napi --strip --arch=ia32",
     "install": "node-gyp-build",
     "prettier": "prettier --write .",
-    "lint": "eslint . --ext js,mjs"
+    "lint": "eslint . --ext js,mjs",
+    "verify": "yarn lint && yarn test"
   },
   "dependencies": {
     "napi-macros": "2.0.0",
