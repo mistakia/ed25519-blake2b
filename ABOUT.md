@@ -7,13 +7,13 @@ description: >-
 base_uri: user:repository/active/ed25519-blake2b/ABOUT.md
 created_at: '2026-05-13T18:07:57.780Z'
 entity_id: e3e58578-cd17-4810-a305-ba2ebb4881fe
+owner_identity_uri: user:identity/trashman.md
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/nano-cryptocurrency.md
 updated_at: '2026-05-13T18:07:57.780Z'
-user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
 ## Purpose
