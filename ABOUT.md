@@ -7,13 +7,22 @@ description: >-
 base_uri: user:repository/active/ed25519-blake2b/ABOUT.md
 created_at: '2026-05-13T18:07:57.780Z'
 entity_id: e3e58578-cd17-4810-a305-ba2ebb4881fe
+observations:
+  - >-
+    [gotcha] Signing is hedged: ed25519-donna mixes random bytes into the nonce
+    (ed25519-donna/ed25519.c:72), so signing the same digest twice gives two different valid
+    signatures; never dedupe or identify content by signature, use the message digest.
+  - >-
+    [gotcha] verify accepts S >= L and accepts forged signatures for small-order public keys,
+    including the burn account (public key zero); a verifier that must be strict checks S < L and
+    rejects small-order keys before calling it, as nano-signed-message does (measured 2026-10-09).
 owner_identity_uri: user:identity/trashman.md
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/nano-cryptocurrency.md
-updated_at: '2026-05-13T18:07:57.780Z'
+updated_at: '2026-10-10T03:35:11.272Z'
 ---
 
 ## Purpose
