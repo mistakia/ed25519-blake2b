@@ -5,7 +5,10 @@
   "main": "index.js",
   "gypfile": true,
   "license": "MIT",
-  "repository": "github:mistakia/ed25519-blake2b",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mistakia/ed25519-blake2b.git"
+  },
   "scripts": {
     "rebuild": "node-gyp rebuild",
     "test": "NODE_ENV=test TEST=all mocha --exit",

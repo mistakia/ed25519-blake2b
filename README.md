@@ -24,3 +24,11 @@ const msg = ed25519.hash('kitties')
 const signature = ed25519.sign(msg, privateKey, publicKey)
 const isValid = ed25519.verify(signature, msg, publicKey)
 ```
+
+# Release
+
+`.github/workflows/publish-npm.yml` publishes to npm by Trusted Publishing (OIDC), so no npm token is involved.
+
+- Bump `version` in `package.json` and push to `main`. The workflow publishes only a version npm does not have yet.
+- If the package has never published through the workflow, first add the trusted publisher on npmjs.com: package Settings, Trusted Publisher, GitHub Actions, repository `mistakia/ed25519-blake2b`, workflow `publish-npm.yml`, environment `npm-release`. A new trusted publisher expires unless a publish succeeds through it within 2 days.
+- Approve the `npm-release` deployment on GitHub.

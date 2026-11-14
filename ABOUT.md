@@ -57,7 +57,7 @@ npm run test                 # Mocha
 npm run prebuild             # Cross-platform prebuilds
 ```
 
-The vendored `ed25519-donna/` and `blake2/` directories are git submodules — initialize them on fresh clones.
+The vendored `ed25519-donna/` and `blake2/` C sources are committed directly in this repo, not as submodules.
 
 **Governing guidelines**:
 
