@@ -1,3 +1,4 @@
+// base-secret-scan: declared-fixture
 const ed25519 = require('../')
 
 const privateKey = Buffer.from(

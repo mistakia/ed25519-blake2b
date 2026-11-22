@@ -1,3 +1,4 @@
+// base-secret-scan: declared-fixture
 /* global describe it */
 
 const crypto = require('crypto')
